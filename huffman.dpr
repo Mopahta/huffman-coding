@@ -21,7 +21,7 @@ Var
   S: Byte;
   First: TreePointer;
   Root: TreePointer;
-  FileHandle, FSize, i, Min: Integer;
+  FileHandle, FSize, i, Min, MaxSp: Integer;
   CharArr: TCharArr;
 
 // Make linked list
@@ -31,17 +31,33 @@ Var
 // .next: Listpointer
 Procedure MakeList(x: TreePointer; Const MyArr: TCharArr);
 Var
+  Deleted: Boolean;
   i: Integer;
+  y: TreePointer;
 
 Begin
+  y := x;
   for i := 0 to 255 do
     if MyArr[i, 1] <> 0 then
     begin
        x^.data := MyArr[i, 0];
        x^.amount := MyArr[i, 1];
+       if i <> 0 then
+       begin
        New(x^.next);
        x := x^.next;
+       end;
     end;
+  Deleted := False;
+  while not Deleted do
+  begin
+    if y^.next^.amount = 0 then
+    begin
+      y^.next := nil;
+      Deleted := True;
+    end;
+    y := y^.next;
+  end;
 End;
 
 // Shell Sort function
@@ -164,45 +180,13 @@ Begin
       z^.next := Tree;
     end;
     y := y^.next^.next;
-
-
   end;
   TreePt := y;
-
-  {for i := 1 to 255 do { TODO: change so that it would work depending on number of elements in list}
-  {begin
-    Tree := CreateTree(y, y^.next);
-    Placed := False;
-    x := y;
-    while (x^.next <> nil) and (not Placed) do
-    begin
-      x := x^.next;
-      if x^.amount>Tree^.Amount then
-      begin
-        z := x^.next;
-        New(x^.next);
-        x^.next^.tree := tree;
-        x^.next^.amount := tree.Amount;
-        x^.next^.next := z;
-        Placed := True;
-      end;
-    end;
-    if not Placed then
-    begin
-      New(x^.next);
-      x^.next^.amount := tree.Amount;
-      x^.next^.tree := tree;
-    end;
-
-
-    y := y^.next^.next;
-  end;
-  ListPt := y;      }
 End;
 
 Procedure print(x:TreePointer);
 Begin
-  while x^.amount <> 0 do
+  while x^.next <> nil do
   begin
     writeln(x^.data, ':', x^.amount);
     x:=x^.next;
@@ -271,12 +255,16 @@ begin
 end;
 
 Procedure PrintTree(Var t:treepointer; space:integer);
+
 begin
   if t<>nil then
   begin
     Printtree(t^.right,space+1);
     for i:=1 to space do write(' ');
-    writeln(t^.amount);
+    if t^.data <> 0 then
+      writeln(t^.amount, ' : ', t^.data)
+    else
+      writeln(t^.amount);
     Printtree(t^.left,space+1);
   end;
 end;
@@ -295,7 +283,7 @@ Begin
   print(first);
   CreateFreqTree(first);
   //InsertTree(Root, CharArr);
-  //PrintTree(first.tree, 1);
+  PrintTree(first, 1);
 
 
   //WriteToFile(First^);
